@@ -32,6 +32,6 @@ cd tynoc-proj
 
 
 
-Frontend Application: http://localhost:8080
+Frontend Application: http://localhost:8085
 Backend API: http://localhost:5001
 MongoDB: localhost:27018
