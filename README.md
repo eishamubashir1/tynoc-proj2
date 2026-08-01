@@ -27,7 +27,7 @@ Ensure you have the following installed on your host machine:
 
 ### 1. Clone the Repository
 ```bash
-git clone <YOUR_GITHUB_REPO_URL>
+git clone <https://github.com/eishamubashir1/tynoc-proj2>
 cd tynoc-proj
 
 
