@@ -1,0 +1,69 @@
+services:
+
+  # 1. DATABASE - MongoDB
+  mongo:
+    image: mongo:6
+    container_name: app_mongodb
+    restart: always
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - webnet
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. BACKEND - Node.js + Express
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: app_backend
+    ports:
+      - "5001:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/mywebsite
+      - NODE_ENV=production
+    volumes:
+      - ./backend/data:/app/data
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - webnet
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 5000 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # 3. FRONTEND - Nginx Web Server
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: app_frontend
+    ports:
+      - "8085:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - webnet
+    restart: always
+
+# NAMED VOLUMES FOR PERSISTENCE
+volumes:
+  mongo_data:
+    driver: local
+
+# SHARED NETWORK
+networks:
+  webnet:
+    driver: bridge
